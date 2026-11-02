@@ -1,17 +1,23 @@
-// ===============================
-// PORTFOLIO SCRIPT
-// ===============================
+
+/* ===============================
+   PORTFOLIO SCRIPT
+================================ */
 
 // Smooth scrolling for navigation links
 document.querySelectorAll('a[href^="#"]').forEach(link => {
-    link.addEventListener('click', function (e) {
-        e.preventDefault();
+    link.addEventListener("click", function (e) {
+        const href = this.getAttribute("href");
 
-        const target = document.querySelector(this.getAttribute('href'));
+        // Ignore empty hash links
+        if (!href || href === "#") return;
+
+        const target = document.querySelector(href);
 
         if (target) {
+            e.preventDefault();
             target.scrollIntoView({
-                behavior: 'smooth'
+                behavior: "smooth",
+                block: "start"
             });
         }
     });
@@ -20,63 +26,47 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
 // Navbar shadow on scroll
 const header = document.querySelector("header");
 
-window.addEventListener("scroll", () => {
+if (header) {
+    window.addEventListener("scroll", () => {
+        header.style.boxShadow = window.scrollY > 50
+            ? "0 4px 20px rgba(0,0,0,0.15)"
+            : "0 2px 15px rgba(0,0,0,0.08)";
+    });
+}
 
-    if (window.scrollY > 50) {
-
-        header.style.boxShadow = "0 4px 20px rgba(0,0,0,0.15)";
-
-    } else {
-
-        header.style.boxShadow = "0 2px 15px rgba(0,0,0,.08)";
-
-    }
-
-});
-
-// Reveal animation
+// Reveal animation — do not hide sections initially
 const sections = document.querySelectorAll(
-    ".about,.skills,.projects,.contact"
+    ".about, .skills, .projects, .contact"
 );
 
-const observer = new IntersectionObserver((entries) => {
-
-    entries.forEach(entry => {
-
-        if (entry.isIntersecting) {
-
-            entry.target.style.opacity = "1";
-
-            entry.target.style.transform = "translateY(0)";
-
-        }
-
+if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("visible");
+                observer.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.05
     });
 
-}, {
-    threshold: 0.2
-});
-
-sections.forEach(section => {
-
-    section.style.opacity = "0";
-
-    section.style.transform = "translateY(40px)";
-
-    section.style.transition = "all .8s ease";
-
-    observer.observe(section);
-
-});
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+} else {
+    // Keep all content visible in unsupported browsers
+    sections.forEach(section => {
+        section.classList.add("visible");
+    });
+}
 
 // Current year in footer
 const footer = document.querySelector("footer p");
 
 if (footer) {
-
-    footer.innerHTML =
+    footer.textContent =
         `© ${new Date().getFullYear()} Payal Nikam | Data Analyst Portfolio`;
-
 }
 
 console.log("Portfolio Loaded Successfully");
